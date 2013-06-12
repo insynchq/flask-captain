@@ -30,19 +30,21 @@ class Customer(object):
 
   def set_as_paid(self):
     print "Customer %r marked as paid" % self.customer_id
+    return True
 
   def send_thanks_email(self):
     print "Sending thanks email to customer %r" % self.customer_id
+    return True
 
 
 @stripe.hook('stripe.charge.succeeded')
-def set_as_paid():
+def set_as_paid(event):
   customer_id = request.json['data']['object']['customer']
   return Customer.get(customer_id).set_as_paid()
 
 
 @stripe.hook('stripe.charge.succeeded')
-def send_thanks_email():
+def send_thanks_email(event):
   customer_id = request.json['data']['object']['customer']
   return Customer.get(customer_id).send_thanks_email()
 
