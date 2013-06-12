@@ -6,71 +6,49 @@ Easy webhooks handling with Flask
 
 ```python
 
-from functools import partial
+from flask import Flask, abort, request
+from flask.ext.captain import Captain
 
-from flask import Blueprint as _Blueprint, jsonify
-
-
-class Blueprint(_Blueprint):
-
-  response_callback = None
-  handlers = {}
-
-  def handle_event(self, name):
-    values = {}
-    event_handlers = self.handlers[name]
-    for handler in event_handlers:
-      args = [name] if len(event_handlers) > 2 else []
-      values.setdefault(name, {})[handler.__name__] = handler(*args)
-    return self._make_response(values)
-
-  def _make_response(self, values):
-    if self.response_callback:
-      return self.response_callback(values)
-    else:
-      success = True
-      for handler_values in values:
-        if success and not all(handler_values):
-          success = False
-      return jsonify(success=success), 200 if success else 500
-
-  def response(self, f):
-    self.response_callback = f
-    return f
-
-  def hook(self, name):
-    def wrapper(f):
-      self.handlers.setdefault(name, []).append(f)
-      return f
-    return wrapper
+app = Flask(__name__)
+captain = Captain(app)
 
 
-class Captain(Blueprint, object):
+@captain.route('/stripe', methods=['POST'])
+def stripe():
+  if request.json:
+    return captain.handle_event('stripe.' + request.json['type'])
+  else:
+    abort(400)
 
-  def __init__(self, *args, **kwargs):
-    args = list(args)
 
-    if len(args) in (1, 3):
-      app = args.pop(0)
-    else:
-      app = kwargs.pop('app', None)
+class Customer(object):
+  def __init__(self, customer_id):
+    self.customer_id = customer_id
 
-    self.app = app
+  @classmethod
+  def get(cls, customer_id):
+    return cls(customer_id)
 
-    if len(args) < 2:
-      kwargs.setdefault('name', 'webhook')
-      kwargs.setdefault('import_name', __name__)
+  def set_as_paid(self):
+    print "Customer %r marked as paid" % self.customer_id
 
-    super(Captain, self).__init__(*args, **kwargs)
+  def send_thanks_email(self):
+    print "Sending thanks email to customer %r" % self.customer_id
 
-    if app:
-      self.init_app(app)
 
-  def init_app(self, app):
-    app.before_first_request(partial(self.register_blueprint, app))
+@captain.hook('stripe.charge.succeeded')
+def set_as_paid():
+  customer_id = request.json['data']['object']['customer']
+  return Customer.get(customer_id).set_as_paid()
 
-  def register_blueprint(self, app, *args, **kwargs):
-    kwargs.setdefault('url_prefix', '/webhooks')
-    app.register_blueprint(self, *args, **kwargs)
+
+@captain.hook('stripe.charge.succeeded')
+def send_thanks_email():
+  customer_id = request.json['data']['object']['customer']
+  return Customer.get(customer_id).send_thanks_email()
+
+
+if __name__ == '__main__':
+  app.run(debug=True)
 
 ```
