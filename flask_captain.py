@@ -10,8 +10,7 @@ class Blueprint(_Blueprint):
     values = {}
     event_handlers = self.handlers[name]
     for handler in event_handlers:
-      args = [name] if len(event_handlers) > 2 else []
-      values.setdefault(name, {})[handler.__name__] = handler(*args)
+      values.setdefault(name, {})[handler.__name__] = handler(name)
     return self._make_response(values)
 
   def _make_response(self, values):

@@ -29,13 +29,13 @@ class Customer(object):
 
 
 @stripe.hook('stripe.charge.succeeded')
-def set_as_paid():
+def set_as_paid(event):
   customer_id = request.json['data']['object']['customer']
   return Customer.get(customer_id).set_as_paid()
 
 
 @stripe.hook('stripe.charge.succeeded')
-def send_thanks_email():
+def send_thanks_email(event):
   customer_id = request.json['data']['object']['customer']
   return Customer.get(customer_id).send_thanks_email()
 
