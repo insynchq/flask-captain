@@ -50,7 +50,7 @@ class Captain(Blueprint, object):
     self.app = app
 
     if len(args) < 2:
-      kwargs.setdefault('name', 'webhook')
+      kwargs.setdefault('name', 'webhooks')
       kwargs.setdefault('import_name', __name__)
 
     super(Captain, self).__init__(*args, **kwargs)
