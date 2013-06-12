@@ -18,8 +18,8 @@ class Blueprint(_Blueprint):
       return self.response_callback(values)
     else:
       success = True
-      for handler_values in values:
-        if success and not all(handler_values):
+      for handler_values in values.values():
+        if success and not all(handler_values.values()):
           success = False
       return jsonify(success=success), 200 if success else 500
 

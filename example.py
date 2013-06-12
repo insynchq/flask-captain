@@ -23,9 +23,11 @@ class Customer(object):
 
   def set_as_paid(self):
     print "Customer %r marked as paid" % self.customer_id
+    return True
 
   def send_thanks_email(self):
     print "Sending thanks email to customer %r" % self.customer_id
+    return True
 
 
 @stripe.hook('stripe.charge.succeeded')
