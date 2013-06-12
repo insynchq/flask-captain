@@ -5,18 +5,17 @@ Easy webhooks handling with Flask
 ## Example
 
 ```python
-
 from flask import Flask, abort, request
-from flask.ext.captain import Captain
+from flask.ext.captain import Blueprint
 
 app = Flask(__name__)
-captain = Captain(app)
+stripe = Blueprint('stripe', __name__)
 
 
-@captain.route('/stripe', methods=['POST'])
-def stripe():
+@stripe.route('/', methods=['POST'])
+def stripe_webhooks():
   if request.json:
-    return captain.handle_event('stripe.' + request.json['type'])
+    return stripe.handle_event('stripe.' + request.json['type'])
   else:
     abort(400)
 
@@ -36,19 +35,20 @@ class Customer(object):
     print "Sending thanks email to customer %r" % self.customer_id
 
 
-@captain.hook('stripe.charge.succeeded')
+@stripe.hook('stripe.charge.succeeded')
 def set_as_paid():
   customer_id = request.json['data']['object']['customer']
   return Customer.get(customer_id).set_as_paid()
 
 
-@captain.hook('stripe.charge.succeeded')
+@stripe.hook('stripe.charge.succeeded')
 def send_thanks_email():
   customer_id = request.json['data']['object']['customer']
   return Customer.get(customer_id).send_thanks_email()
 
 
 if __name__ == '__main__':
+  app.register_blueprint(stripe)
   app.run(debug=True)
 
 ```
