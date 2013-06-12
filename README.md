@@ -1,4 +1,4 @@
-# Flask-Canvas
+# Flask-Captain
 
 Easy webhooks handling with Flask
 
