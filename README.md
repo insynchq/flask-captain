@@ -104,3 +104,9 @@ if __name__ == '__main__':
   app.run(debug=True)
 
 ```
+
+## TODO
+
+* Authorization
+* Use signals
+* Tests and proper documentation
