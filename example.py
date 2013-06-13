@@ -2,15 +2,6 @@ from flask import Flask, abort, request
 from flask.ext.captain import Blueprint
 
 app = Flask(__name__)
-stripe = Blueprint('stripe', __name__)
-
-
-@stripe.route('/', methods=['POST'])
-def stripe_webhooks():
-  if request.json:
-    return stripe.handle_event('stripe.' + request.json['type'])
-  else:
-    abort(400)
 
 
 class Customer(object):
@@ -30,18 +21,33 @@ class Customer(object):
     return True
 
 
-@stripe.hook('stripe.charge.succeeded')
+stripe_webhooks = Blueprint('stripe_webhooks', __name__)
+
+
+@stripe_webhooks.route('/', methods=['POST'])
+def handle():
+  if request.json:
+    return stripe_webhooks.handle_event('stripe.' + request.json['type'])
+  else:
+    abort(400)
+
+
+@stripe_webhooks.hook('stripe.charge.succeeded')
+def get_customer(event):
+  g.customer = Customer.get(request.json['data']['object']['customer'])
+  return True
+
+
+@stripe_webhooks.hook('stripe.charge.succeeded')
 def set_as_paid(event):
-  customer_id = request.json['data']['object']['customer']
-  return Customer.get(customer_id).set_as_paid()
+  return g.customer.set_as_paid()
 
 
-@stripe.hook('stripe.charge.succeeded')
+@stripe_webhooks.hook('stripe.charge.succeeded')
 def send_thanks_email(event):
-  customer_id = request.json['data']['object']['customer']
-  return Customer.get(customer_id).send_thanks_email()
+  return g.customer.send_thanks_email()
 
 
 if __name__ == '__main__':
-  app.register_blueprint(stripe)
+  app.register_blueprint(stripe_webhooks)
   app.run(debug=True)
