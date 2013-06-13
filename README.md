@@ -10,9 +10,6 @@ How do you create the server that handles those webhooks you want?
 It usually ends up like this:
 
 ```python
-from flask import Flask, jsonify, request
-
-
 class Customer(object):
   def __init__(self, customer_id):
     self.customer_id = customer_id
@@ -28,7 +25,10 @@ class Customer(object):
   def send_thanks_email(self):
     print "Sending thanks email to customer %r" % self.customer_id
     return True
-    
+
+
+from flask import Flask, jsonify, request
+
 
 app = Flask(__name__)
 
@@ -62,8 +62,11 @@ Flask-Captain extends the `Blueprint` class with
 some added methods to make webhooks handling easier.
 
 ```python
+from flask import Flask, jsonify, request, g
 from flask.ext.captain import Blueprint
 
+
+app = Flask(__name__)
 stripe_webhooks = Blueprint('stripe_webhooks', __name__)
 
 

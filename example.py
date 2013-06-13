@@ -1,5 +1,6 @@
-from flask import Flask, abort, request
+from flask import Flask, abort, request, g
 from flask.ext.captain import Blueprint
+
 
 app = Flask(__name__)
 
