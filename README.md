@@ -2,6 +2,7 @@
 
 Clean webhooks handling with Flask
 
+*See [example.py](example.py)*
 
 ## TODO
 
