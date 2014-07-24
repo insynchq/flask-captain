@@ -8,6 +8,7 @@ setup(
   author='Mark Steve Samson',
   author_email='hello@marksteve.com',
   url='https://github.com/marksteve/flask-captain',
+  license='MIT',
   py_modules=['flask_captain'],
   install_requires=[
     'Flask',

@@ -72,3 +72,4 @@ class Captain(object):
       self.handlers.setdefault(event, []).append(f)
       return f
     return decorator
+
