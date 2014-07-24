@@ -6,5 +6,5 @@ Clean webhooks handling with Flask
 
 ## TODO
 
-* Authorization
+* Defaults for popular services
 * Tests and proper documentation
